@@ -18,7 +18,7 @@ def create_app():
     
     db.init_app(app)
 
-    #from .models import Concepts
+    from .models import Schools, Subjects, Grades, Central_contents, Central_requirements
 
     create_database(app)
 

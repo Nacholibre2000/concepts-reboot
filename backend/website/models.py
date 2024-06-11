@@ -1,11 +1,5 @@
-from backend.website import db
+from . import db
 from sqlalchemy.sql import func
-
-class Concepts(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    concept = db.Column(db.String(10000))
-    date = db.Column(db.DateTime(timezone=True), default=func.now())
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
 class Schools(db.Model):
     __tablename__ = 'schools' 
@@ -106,3 +100,13 @@ class Central_requirements(db.Model):
             'foreign_id_grade': self.foreign_id_grade,
             'table': self.__tablename__ 
         }
+
+
+#class Concepts(db.Model):
+#    id = db.Column(db.Integer, primary_key=True)
+#    concept = db.Column(db.String(10000))
+#    date = db.Column(db.DateTime(timezone=True), default=func.now())
+#    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+
+
