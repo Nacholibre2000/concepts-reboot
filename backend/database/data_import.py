@@ -19,7 +19,7 @@ schools_path = r'F:\Egna kreativa projekt\VScode\Concepts resources\schools_data
 subjects_path = r'F:\Egna kreativa projekt\VScode\Concepts resources\subjects_data.csv'
 grades_path = r'F:\Egna kreativa projekt\VScode\Concepts resources\grades_data.csv'
 subsections_path = r'F:\Egna kreativa projekt\VScode\Concepts resources\subsections_data.csv'
-central_contents_data_path = r'F:\Egna kreativa projekt\VScode\Concepts resources\central_contents_data.csv'
+central_contents_path = r'F:\Egna kreativa projekt\VScode\Concepts resources\central_contents_data.csv'
 central_requirements_path = r'F:\Egna kreativa projekt\VScode\Concepts resources\central_requirements_data.csv'
 
 
@@ -40,18 +40,21 @@ def import_grades(file_path, engine):
     df.to_sql('grades', engine, if_exists='append', index=False)
 
 def import_subsections(file_path, engine):
-    columns_to_keep = ['id', 'subject', 'foreign_id_school']
+    columns_to_keep = ['id', 'subsection', 'foreign_id_grade']
     df = pd.read_csv(file_path, usecols=columns_to_keep)
+    df['foreign_id_grade'] = df['foreign_id_grade'].apply(lambda x: x.split('-')[-1])
     df.to_sql('subsections', engine, if_exists='append', index=False)    
 
 def import_central_contents(file_path, engine):
     columns_to_keep = ['id', 'central_content', 'foreign_id_subsection']
     df = pd.read_csv(file_path, usecols=columns_to_keep)
+    df['foreign_id_subsection'] = df['foreign_id_subsection'].apply(lambda x: x.split('-')[-1])
     df.to_sql('central_contents', engine, if_exists='append', index=False)
 
 def import_central_requirements(file_path, engine):
     columns_to_keep = ['id', 'central_requirement', 'foreign_id_grade']
     df = pd.read_csv(file_path, usecols=columns_to_keep)
+    df['foreign_id_grade'] = df['foreign_id_grade'].apply(lambda x: x.split('-')[-1])
     df.to_sql('central_requirements', engine, if_exists='append', index=False)
 
 # Define more functions as needed

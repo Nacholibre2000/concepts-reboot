@@ -19,11 +19,9 @@ engine = create_engine(os.getenv("DATABASE_URL"))
 # Import data
 #data_import.import_schools(data_import.schools_path, data_import.engine)
 #data_import.import_subjects(data_import.subjects_path, data_import.engine)
-data_import.import_grades(data_import.grades_path, data_import.engine)
-
-#def import_subjects(file_path, engine):
-#    columns_to_keep = ['id', 'subject', 'foreign_id_school']
-#    df = pd.read_csv(file_path, usecols=columns_to_keep)
-#    df.to_sql('subjects', engine, if_exists='append', index=False)
+#data_import.import_grades(data_import.grades_path, data_import.engine)
+data_import.import_subsections(data_import.subsections_path, data_import.engine)
+data_import.import_central_contents(data_import.central_contents_path, data_import.engine)
+data_import.import_central_requirements(data_import.central_requirements_path, data_import.engine)
 
 print("Data import completed successfully.")
