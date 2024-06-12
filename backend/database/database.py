@@ -16,12 +16,10 @@ load_dotenv()
 # Initialize the SQLAlchemy engine
 engine = create_engine(os.getenv("DATABASE_URL"))
 
-# Define the paths to your CSV files
-schools_path = r'F:\Egna kreativa projekt\VScode\Concepts resources\schools.csv'
-# subjects_path = r'path/to/your/subjects.csv'
-
 # Import data
-data_import.import_schools(data_import.schools_path, data_import.engine)
+#data_import.import_schools(data_import.schools_path, data_import.engine)
+#data_import.import_subjects(data_import.subjects_path, data_import.engine)
+data_import.import_grades(data_import.grades_path, data_import.engine)
 
 #def import_subjects(file_path, engine):
 #    columns_to_keep = ['id', 'subject', 'foreign_id_school']
