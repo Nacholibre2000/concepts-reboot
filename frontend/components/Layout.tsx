@@ -1,22 +1,21 @@
-// Layout.tsx
 import React, { ReactNode } from 'react';
 import Navbar from './Navbar'; // Adjust the import to your folder structure
-/* import Sidebar from './Sidebar'; // Import the Sidebar component
- */
+/* import Sidebar from './Sidebar'; // Import the Sidebar component */
+
 type LayoutProps = {
   children: ReactNode;
 };
 
-export default function Layout({ children }: LayoutProps) {
+const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex h-screen flex-col">
       <Navbar />
-      {/* <div className="flex flex-1">
-        <Sidebar />
-        <main className="flex-1 p-4">
-          {children}
-        </main>
-      </div> */}
+      <div className="flex flex-1">
+        {/* <Sidebar /> */}
+        <main>{children}</main>
+      </div>
     </div>
   );
-}
+};
+
+export default Layout;

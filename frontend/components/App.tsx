@@ -1,5 +1,5 @@
 import React from 'react';
-import '../styles/App.css'; // Adjust the path if necessary
+import '../styles/App.css';
 
 function App() {
   return (
@@ -9,9 +9,7 @@ function App() {
           Kursplaner online
         </span>
       </div>
-      <div>
-        {/* Add your main components here */}
-      </div>
+      <div>{/* Add your main components here */}</div>
     </div>
   );
 }
