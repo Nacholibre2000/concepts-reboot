@@ -18,7 +18,9 @@ def create_app():
     
     db.init_app(app)
 
-    from .models import Schools, Subjects, Grades, Central_contents, Central_requirements
+    from .views import views
+
+    app.register_blueprint(views, url_prefix='/')
 
     create_database(app)
 
