@@ -1,19 +1,16 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import AppRoutes from '../components/AppRoutes'; // Adjust the path if necessary
+import App from '../components/App'; // Importing App instead of AppRoutes
 import '../styles/global.css'; // Global CSS file
-import '../styles/tailwind.css';
+import '../styles/tailwind.css'; // Tailwind CSS file
 
 // This is the entry point of the application.
-// It initializes the root component App defined in
-// /components/app.tsx and then renders it into
-// the DOM.The DOM is the resulting tree structure of
-// the HTML after the browser has parsed it.
+// It initializes the root component App defined in App.tsx and renders it into the DOM.
 
 const container = document.getElementById('root') as HTMLElement;
 const root = createRoot(container!);
 root.render(
   <React.StrictMode>
-    <AppRoutes />
+    <App /> {/* Render App instead of AppRoutes */}
   </React.StrictMode>,
 );

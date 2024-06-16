@@ -1,4 +1,5 @@
 import React from 'react';
+import AppRoutes from './AppRoutes'; // Importing AppRoutes
 
 function App() {
   return (
@@ -8,7 +9,7 @@ function App() {
           Kursplanen online
         </span>
       </div>
-      <div>{/* Add your main components here */}</div>
+      <AppRoutes /> {/* Include AppRoutes */}
     </div>
   );
 }
