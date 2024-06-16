@@ -1,7 +1,8 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import AppRoutes from '../components/AppRoutes'; // Adjust the path if necessary
-import '../styles/index.css'; // Global CSS file
+import '../styles/global.css'; // Global CSS file
+import '../styles/tailwind.css';
 
 // This is the entry point of the application.
 // It initializes the root component App defined in
