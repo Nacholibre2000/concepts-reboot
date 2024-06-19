@@ -18,9 +18,9 @@ def create_app():
     
     db.init_app(app)
 
-    from .views import views
+    from .views.sidebar_data import sidebar_data
 
-    app.register_blueprint(views, url_prefix='/')
+    app.register_blueprint(sidebar_data, url_prefix='/')
 
     create_database(app)
 
