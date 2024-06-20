@@ -23,50 +23,6 @@ def add_node():
     date = data.get('date')
     source = data.get('source')
     license = data.get('license')
-
-    client, client_stub = create_dgraph_client()
-    txn = client.txn()
-
-    try:
-        p = {
-            'uid': '_:newNode',
-            'image_url': image_url,
-            'concept': concept,
-            'person': person,
-            'event': event,
-            'place_name': place_name,
-            'explanation': explanation,
-            'place_geo': place_geo,
-            'date': date,
-            'source': source,
-            'license': license,
-        }
-        mutation = txn.create_mutation(set_obj=p)
-        request = txn.create_request(mutations=[mutation], commit_now=True)
-        response = txn.do_request(request)
-        txn.commit()
-
-        return jsonify({'message': 'Node added successfully', 'uid': response.uids['newNode']})
-    except Exception as e:
-        return jsonify({'message': 'Failed to add node', 'error': str(e)}), 500
-    finally:
-        txn.discard()
-        client_stub.close()
-
-
-@dgraph_data.route('/add_node', methods=['POST'])
-def add_node():
-    data = request.json
-    image_url = data.get('image_url')
-    concept = data.get('name')
-    person = data.get('person')
-    event = data.get('event')
-    place_name = data.get('place_name')
-    explanation = data.get('explanation')
-    place_geo = data.get('place_geo')  # Assuming this is GeoJSON format
-    date = data.get('date')
-    source = data.get('source')
-    license = data.get('license')
     hashtags = data.get('hashtags', [])  # List of hashtag objects
 
     client, client_stub = create_dgraph_client()
@@ -137,6 +93,8 @@ def add_node():
                             'place_name': tag.get('place_name')
                         }
                         hashtag_uids.append(new_tag)
+                        # The mutation block of hashtags code is probably not correct. Especially it is not clear how
+                        # The logic would work to assign what type of predicate the new tag is.
 
         # Link hashtags to the main node
         if hashtag_uids:
