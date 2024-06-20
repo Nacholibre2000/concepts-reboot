@@ -18,11 +18,11 @@ def create_app():
     
     db.init_app(app)
 
-    from .views.sidebar_data import sidebar_data
-    from .views.dgraph_data import dgraph_data
+    from .views.curriculum_data import curriculum_data
+    from .views.node_data import node_data
 
-    app.register_blueprint(sidebar_data, url_prefix='/api')
-    app.register_blueprint(dgraph_data, url_prefix='/api')
+    app.register_blueprint(curriculum_data, url_prefix='/api')
+    app.register_blueprint(node_data, url_prefix='/api')
 
     create_database(app)
 

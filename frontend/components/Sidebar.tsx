@@ -17,7 +17,7 @@ export default function Sidebar() {
 
   useEffect(() => {
     // Fetch data from your API endpoint
-    fetch('http://localhost:5000/api/sidebar-data')
+    fetch('http://localhost:5000/api/curriculum_data')
       .then((res) => res.json())
       .then((allData) => {
         const mapToDisplayName = (item: any) => {

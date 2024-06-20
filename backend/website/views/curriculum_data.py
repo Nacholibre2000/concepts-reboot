@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify
 from ..models import Schools, Subjects, Grades, Subsections, Central_contents, Central_requirements 
 
-sidebar_data = Blueprint('sidebar_data', __name__)
+curriculum_data = Blueprint('curriculum_data', __name__)
 
 def fetch_related_items(table_name, item_id):
     #print(f"Fetching related items for table: {table_name}, ID: {item_id}")  # Debugging line
@@ -33,10 +33,10 @@ def fetch_related_items(table_name, item_id):
             children.append(central_content.serialize())
     return children
 
-@sidebar_data.route('/sidebar-data', methods=['GET'])
+@curriculum_data.route('/curriculum_data', methods=['GET'])
 
-def get_sidebar_data():
-    print("Fetching initial sidebar data...")  # Debugging line
+def get_curriculum_data():
+    print("Fetching initial curriculum data...")  # Debugging line
     schools = Schools.query.all()
     school_data = []
     for school in schools:

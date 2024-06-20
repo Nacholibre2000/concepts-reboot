@@ -42,21 +42,41 @@ const AddNode: React.FC = () => {
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
-    setShowFields({
-      ...showFields,
-      [name]: checked,
+    setShowFields((prevShowFields) => {
+      const newShowFields = {
+        ...prevShowFields,
+        [name]: checked,
+        explanation: checked || prevShowFields.explanation,
+        source: checked || prevShowFields.source,
+        hashtags: checked || prevShowFields.hashtags,
+      };
+
+      if (name === 'image_url') {
+        newShowFields.license = checked;
+      }
+      if (name === 'event' || name === 'person') {
+        newShowFields.date = checked;
+      }
+      if (name === 'place_name') {
+        newShowFields.place_geo = checked;
+      }
+
+      return newShowFields;
     });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:8080/add_node', {
-        ...formData,
-        hashtags: formData.hashtags
-          .split(',')
-          .map((tag) => ({ concept: tag.trim() })), // Assuming hashtags are only concepts
-      });
+      const response = await axios.post(
+        'http://localhost:5000/api/node_data/add_node',
+        {
+          ...formData,
+          hashtags: formData.hashtags
+            .split(',')
+            .map((tag) => ({ concept: tag.trim() })), // Assuming hashtags are only concepts
+        },
+      );
       alert(`Node added successfully: ${response.data.uid}`);
     } catch (error) {
       const err = error as AxiosError; // Type assertion here
@@ -86,6 +106,14 @@ const AddNode: React.FC = () => {
               id="image_url"
               name="image_url"
               value={formData.image_url}
+              onChange={handleChange}
+            />
+            <label htmlFor="license">License:</label>
+            <input
+              type="text"
+              id="license"
+              name="license"
+              value={formData.license}
               onChange={handleChange}
             />
           </div>
@@ -134,6 +162,14 @@ const AddNode: React.FC = () => {
               value={formData.person}
               onChange={handleChange}
             />
+            <label htmlFor="date">Date:</label>
+            <input
+              type="date"
+              id="date"
+              name="date"
+              value={formData.date}
+              onChange={handleChange}
+            />
           </div>
         )}
       </div>
@@ -155,6 +191,14 @@ const AddNode: React.FC = () => {
               id="event"
               name="event"
               value={formData.event}
+              onChange={handleChange}
+            />
+            <label htmlFor="date">Date:</label>
+            <input
+              type="date"
+              id="date"
+              name="date"
+              value={formData.date}
               onChange={handleChange}
             />
           </div>
@@ -180,43 +224,6 @@ const AddNode: React.FC = () => {
               value={formData.place_name}
               onChange={handleChange}
             />
-          </div>
-        )}
-      </div>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            name="explanation"
-            checked={showFields.explanation}
-            onChange={handleCheckboxChange}
-          />
-          Explanation
-        </label>
-        {showFields.explanation && (
-          <div>
-            <label htmlFor="explanation">Explanation:</label>
-            <textarea
-              id="explanation"
-              name="explanation"
-              value={formData.explanation}
-              onChange={handleChange}
-            ></textarea>
-          </div>
-        )}
-      </div>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            name="place_geo"
-            checked={showFields.place_geo}
-            onChange={handleCheckboxChange}
-          />
-          Place Geo (GeoJSON)
-        </label>
-        {showFields.place_geo && (
-          <div>
             <label htmlFor="place_geo">Place Geo (GeoJSON):</label>
             <textarea
               id="place_geo"
@@ -227,40 +234,21 @@ const AddNode: React.FC = () => {
           </div>
         )}
       </div>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            name="date"
-            checked={showFields.date}
-            onChange={handleCheckboxChange}
-          />
-          Date
-        </label>
-        {showFields.date && (
+      {(showFields.image_url ||
+        showFields.concept ||
+        showFields.person ||
+        showFields.event ||
+        showFields.place_name) && (
+        <>
           <div>
-            <label htmlFor="date">Date:</label>
-            <input
-              type="date"
-              id="date"
-              name="date"
-              value={formData.date}
+            <label htmlFor="explanation">Explanation:</label>
+            <textarea
+              id="explanation"
+              name="explanation"
+              value={formData.explanation}
               onChange={handleChange}
-            />
+            ></textarea>
           </div>
-        )}
-      </div>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            name="source"
-            checked={showFields.source}
-            onChange={handleCheckboxChange}
-          />
-          Source
-        </label>
-        {showFields.source && (
           <div>
             <label htmlFor="source">Source:</label>
             <input
@@ -271,42 +259,6 @@ const AddNode: React.FC = () => {
               onChange={handleChange}
             />
           </div>
-        )}
-      </div>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            name="license"
-            checked={showFields.license}
-            onChange={handleCheckboxChange}
-          />
-          License
-        </label>
-        {showFields.license && (
-          <div>
-            <label htmlFor="license">License:</label>
-            <input
-              type="text"
-              id="license"
-              name="license"
-              value={formData.license}
-              onChange={handleChange}
-            />
-          </div>
-        )}
-      </div>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            name="hashtags"
-            checked={showFields.hashtags}
-            onChange={handleCheckboxChange}
-          />
-          Hashtags (comma-separated)
-        </label>
-        {showFields.hashtags && (
           <div>
             <label htmlFor="hashtags">Hashtags (comma-separated):</label>
             <input
@@ -317,8 +269,8 @@ const AddNode: React.FC = () => {
               onChange={handleChange}
             />
           </div>
-        )}
-      </div>
+        </>
+      )}
       <button type="submit">Add Node</button>
     </form>
   );

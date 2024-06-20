@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 import pydgraph
 import json
 
-dgraph_data = Blueprint('dgraph_data', __name__)
+node_data = Blueprint('node_data', __name__)
 
 # Dgraph client setup
 def create_dgraph_client():
@@ -10,11 +10,11 @@ def create_dgraph_client():
     client = pydgraph.DgraphClient(client_stub)
     return client, client_stub
 
-@dgraph_data.route('/add_node', methods=['POST'])
+@node_data.route('/node_data/add_node', methods=['POST'])
 def add_node():
     data = request.json
     image_url = data.get('image_url')
-    concept = data.get('name')
+    concept = data.get('concept')
     person = data.get('person')
     event = data.get('event')
     place_name = data.get('place_name')
@@ -73,9 +73,9 @@ def add_node():
                 elif tag.get('place_name'):
                     query = """
                     {
-                        existingNode as var(func: eq(place, "%s"))
+                        existingNode as var(func: eq(place_name, "%s"))
                     }
-                    """ % tag.get('place')
+                    """ % tag.get('place_name')
 
                 if query:
                     response = txn.query(query)
@@ -93,8 +93,6 @@ def add_node():
                             'place_name': tag.get('place_name')
                         }
                         hashtag_uids.append(new_tag)
-                        # The mutation block of hashtags code is probably not correct. Especially it is not clear how
-                        # The logic would work to assign what type of predicate the new tag is.
 
         # Link hashtags to the main node
         if hashtag_uids:
@@ -113,9 +111,12 @@ def add_node():
         txn.discard()
         client_stub.close()
 
-@dgraph_data.route('/dgraph/query', methods=['GET'])
+@node_data.route('/node_data/query', methods=['GET'])
 def query_node():
     node_value = request.args.get('node')
+    
+    if not node_value:
+        return jsonify({"message": "Missing query parameter: node"}), 400
     
     # Define the possible predicates to search for
     predicates = ["concept", "person", "event", "place_name"]
@@ -135,7 +136,7 @@ def query_node():
             event
             place_name
             explanation
-            place_
+            place_geo
             image_url
             date
             source
@@ -161,4 +162,3 @@ def query_node():
     finally:
         txn.discard()
         client_stub.close()
-
