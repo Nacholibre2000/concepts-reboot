@@ -33,7 +33,7 @@ def fetch_related_items(table_name, item_id):
             children.append(central_content.serialize())
     return children
 
-@sidebar_data.route('/api/sidebar-data', methods=['GET'])
+@sidebar_data.route('/sidebar-data', methods=['GET'])
 
 def get_sidebar_data():
     print("Fetching initial sidebar data...")  # Debugging line

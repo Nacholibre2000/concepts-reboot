@@ -21,8 +21,8 @@ def create_app():
     from .views.sidebar_data import sidebar_data
     from .views.dgraph_data import dgraph_data
 
-    app.register_blueprint(sidebar_data, url_prefix='/')
-    app.register_blueprint(dgraph_data, url_prefix='/')
+    app.register_blueprint(sidebar_data, url_prefix='/api')
+    app.register_blueprint(dgraph_data, url_prefix='/api')
 
     create_database(app)
 
