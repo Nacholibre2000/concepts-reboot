@@ -13,7 +13,7 @@ const AddNode: React.FC = () => {
     date: '',
     source: '',
     license: '',
-    hashtags: '', // Assuming hashtags are input as a comma-separated string
+    hashtags: [] as { name: string; type: string }[], // List of hashtags with type
   });
 
   const [showFields, setShowFields] = useState({
@@ -27,11 +27,14 @@ const AddNode: React.FC = () => {
     date: false,
     source: false,
     license: false,
-    hashtags: false,
   });
 
+  const [newHashtag, setNewHashtag] = useState({ name: '', type: 'concept' });
+
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) => {
     const { name, value } = e.target;
     setFormData({
@@ -48,7 +51,6 @@ const AddNode: React.FC = () => {
         [name]: checked,
         explanation: checked || prevShowFields.explanation,
         source: checked || prevShowFields.source,
-        hashtags: checked || prevShowFields.hashtags,
       };
 
       if (name === 'image_url') {
@@ -65,21 +67,40 @@ const AddNode: React.FC = () => {
     });
   };
 
+  const handleAddHashtag = () => {
+    setFormData({
+      ...formData,
+      hashtags: [...formData.hashtags, { ...newHashtag }],
+    });
+    setNewHashtag({ name: '', type: 'concept' }); // Reset new hashtag input
+  };
+
+  const handleHashtagChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    const { name, value } = e.target;
+    setNewHashtag({
+      ...newHashtag,
+      [name]: value,
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      console.log('Form data being submitted:', {
+        ...formData,
+        hashtags: formData.hashtags,
+      });
       const response = await axios.post(
         'http://localhost:5000/api/node_data/add_node',
         {
           ...formData,
-          hashtags: formData.hashtags
-            .split(',')
-            .map((tag) => ({ concept: tag.trim() })), // Assuming hashtags are only concepts
         },
       );
       alert(`Node added successfully: ${response.data.uid}`);
     } catch (error) {
-      const err = error as AxiosError; // Type assertion here
+      const err = error as any; // Type assertion here
       alert(
         `Failed to add node: ${err.response ? err.response.data.message : err.message}`,
       );
@@ -260,14 +281,36 @@ const AddNode: React.FC = () => {
             />
           </div>
           <div>
-            <label htmlFor="hashtags">Hashtags (comma-separated):</label>
-            <input
-              type="text"
-              id="hashtags"
-              name="hashtags"
-              value={formData.hashtags}
-              onChange={handleChange}
-            />
+            <h4>Hashtags</h4>
+            {formData.hashtags.map((tag, index) => (
+              <div key={index}>
+                <span>
+                  {tag.name} ({tag.type})
+                </span>
+              </div>
+            ))}
+            <div>
+              <input
+                type="text"
+                name="name"
+                value={newHashtag.name}
+                onChange={handleHashtagChange}
+                placeholder="Hashtag name"
+              />
+              <select
+                name="type"
+                value={newHashtag.type}
+                onChange={handleHashtagChange}
+              >
+                <option value="concept">Concept</option>
+                <option value="person">Person</option>
+                <option value="event">Event</option>
+                <option value="place_name">Place</option>
+              </select>
+              <button type="button" onClick={handleAddHashtag}>
+                Add Hashtag
+              </button>
+            </div>
           </div>
         </>
       )}
