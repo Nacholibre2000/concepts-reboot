@@ -9,8 +9,8 @@ const AddNode: React.FC = () => {
     event: '',
     place_name: '',
     explanation: '',
-    place_geo: '',
-    date: '',
+    place_geo: { type: 'Point', coordinates: [0, 0] }, // Default GeoJSON structure
+    date: '',  // Assuming the date is in 'YYYY-MM-DD' format
     source: '',
     license: '',
     hashtags: [] as { name: string; type: string }[], // List of hashtags with type
@@ -96,6 +96,7 @@ const AddNode: React.FC = () => {
         'http://localhost:5000/api/node_data/add_node',
         {
           ...formData,
+          date: formData.date ? new Date(formData.date).toISOString() : null, // Ensure date is in ISO format
         },
       );
       alert(`Node added successfully: ${response.data.uid}`);
@@ -249,7 +250,7 @@ const AddNode: React.FC = () => {
             <textarea
               id="place_geo"
               name="place_geo"
-              value={formData.place_geo}
+              value={JSON.stringify(formData.place_geo)}  // Convert GeoJSON to string for display
               onChange={handleChange}
             ></textarea>
           </div>
