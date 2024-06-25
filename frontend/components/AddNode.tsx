@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
+// Ensure Axios is sending credentials with requests
+axios.defaults.withCredentials = true;
+
 const AddNode: React.FC = () => {
   const [formData, setFormData] = useState({
     image_url: '',
@@ -96,6 +99,12 @@ const AddNode: React.FC = () => {
         'http://localhost:5000/api/node_data/add_node',
         {
           ...formData,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true, // Important to include cookies
         },
       );
       alert(`Node added successfully: ${response.data.uid}`);

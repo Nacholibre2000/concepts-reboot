@@ -1,6 +1,7 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, make_response
 import pydgraph
 import json
+
 
 node_data = Blueprint('node_data', __name__)
 
@@ -10,72 +11,91 @@ def create_dgraph_client():
     client = pydgraph.DgraphClient(client_stub)
     return client, client_stub
 
-@node_data.route('/node_data/add_node', methods=['POST'])
+@node_data.route('/node_data/add_node', methods=['POST', 'OPTIONS'])
 def add_node():
-    data = request.json
-    image_url = data.get('image_url')
-    concept = data.get('concept')
-    person = data.get('person')
-    event = data.get('event')
-    place_name = data.get('place_name')
-    explanation = data.get('explanation')
-    place_geo = data.get('place_geo')  # Assuming this is GeoJSON format
-    date = data.get('date')
-    source = data.get('source')
-    license = data.get('license')
-    hashtags = data.get('hashtags', [])  # List of hashtag objects
+    if request.method == 'OPTIONS':
+        return _build_cors_preflight_response()
+    
+    # Print request headers
+    print("Request Headers:", request.headers)
+    
+    # Verify if content-type is application/json
+    if request.content_type != 'application/json':
+        print("Content-Type is not application/json")
+        return jsonify({'message': 'Content-Type must be application/json'}), 400
 
-    client, client_stub = create_dgraph_client()
-    txn = client.txn()
+    # Print the raw data received
+    raw_data = request.get_data()
+    print("Raw Data Received:", raw_data)
 
     try:
-        # Prepare the main node
-        main_node = {
-            'uid': '_:newNode',
-            'image_url': image_url,
-            'concept': concept,
-            'person': person,
-            'event': event,
-            'place_name': place_name,
-            'explanation': explanation,
-            'place_geo': place_geo,
-            'date': date,
-            'source': source,
-            'license': license,
-        }
+        # Try to parse JSON data
+        data = request.get_json()  # Ensure we get the JSON data correctly
+        if data is None:
+            print("No JSON data received")
+            return jsonify({'message': 'No JSON data received'}), 400
 
-        # Prepare mutations for hashtags
-        hashtag_uids = []
-        for tag in hashtags:
-            uid = tag.get('uid')
-            if uid:  # Existing node by UID
-                hashtag_uids.append({'uid': uid})
-            else:  # New or existing node by concept, person, event, or place
+        print(f"Received data: {data}")  # Print the received JSON data
+
+        image_url = data.get('image_url')
+        concept = data.get('concept')
+        person = data.get('person')
+        event = data.get('event')
+        place_name = data.get('place_name')
+        explanation = data.get('explanation')
+        place_geo = data.get('place_geo')  # Assuming this is GeoJSON format
+        date = data.get('date')
+        source = data.get('source')
+        license = data.get('license')
+        hashtags = data.get('hashtags', [])  # List of hashtag objects
+
+        client, client_stub = create_dgraph_client()
+        txn = client.txn()
+
+        try:
+            # Prepare the main node
+            main_node = {
+                'uid': '_:newNode',
+                'image_url': image_url,
+                'concept': concept,
+                'person': person,
+                'event': event,
+                'place_name': place_name,
+                'explanation': explanation,
+                'place_geo': place_geo,
+                'date': date,
+                'source': source,
+                'license': license,
+            }
+
+            # Prepare mutations for hashtags
+            hashtag_uids = []
+            for tag in hashtags:
                 query = None
-                if tag.get('concept'):
+                if tag['type'] == 'concept':
                     query = """
                     {
                         existingNode as var(func: eq(concept, "%s"))
                     }
-                    """ % tag.get('concept')
-                elif tag.get('person'):
+                    """ % tag['name']
+                elif tag['type'] == 'person':
                     query = """
                     {
                         existingNode as var(func: eq(person, "%s"))
                     }
-                    """ % tag.get('person')
-                elif tag.get('event'):
+                    """ % tag['name']
+                elif tag['type'] == 'event':
                     query = """
                     {
                         existingNode as var(func: eq(event, "%s"))
                     }
-                    """ % tag.get('event')
-                elif tag.get('place_name'):
+                    """ % tag['name']
+                elif tag['type'] == 'place_name':
                     query = """
                     {
                         existingNode as var(func: eq(place_name, "%s"))
                     }
-                    """ % tag.get('place_name')
+                    """ % tag['name']
 
                 if query:
                     response = txn.query(query)
@@ -87,29 +107,33 @@ def add_node():
                         # Create a new node
                         new_tag = {
                             'uid': f'_:newTag{len(hashtag_uids)}',  # Create unique blank node identifier
-                            'concept': tag.get('concept'),
-                            'event': tag.get('event'),
-                            'person': tag.get('person'),
-                            'place_name': tag.get('place_name')
+                            tag['type']: tag['name']
                         }
                         hashtag_uids.append(new_tag)
 
-        # Link hashtags to the main node
-        if hashtag_uids:
-            main_node['hashtags'] = hashtag_uids
+            # Link hashtags to the main node
+            if hashtag_uids:
+                main_node['hashtags'] = hashtag_uids
 
-        # Perform the mutation
-        mutation = txn.create_mutation(set_obj=main_node)
-        request = txn.create_request(mutations=[mutation], commit_now=True)
-        response = txn.do_request(request)
-        txn.commit()
+            # Perform the mutation
+            mutations = [txn.create_mutation(set_obj=main_node)]
+            for new_tag in hashtag_uids:
+                if new_tag['uid'].startswith('_:'):
+                    mutations.append(txn.create_mutation(set_obj=new_tag))
 
-        return jsonify({'message': 'Node added successfully', 'uid': response.uids['newNode']})
+            request = txn.create_request(mutations=mutations, commit_now=True)
+            response = txn.do_request(request)
+            txn.commit()
+
+            return _corsify_actual_response(jsonify({'message': 'Node added successfully', 'uid': response.uids['newNode']}))
+        except Exception as e:
+            return _corsify_actual_response(jsonify({'message': 'Failed to add node', 'error': str(e)}), 500)
+        finally:
+            txn.discard()
+            client_stub.close()
     except Exception as e:
-        return jsonify({'message': 'Failed to add node', 'error': str(e)}), 500
-    finally:
-        txn.discard()
-        client_stub.close()
+        print(f"Error occurred: {e}")
+        return _corsify_actual_response(jsonify({'message': 'Failed to add node', 'error': str(e)}), 500)
 
 @node_data.route('/node_data/query', methods=['GET'])
 def query_node():
@@ -162,3 +186,18 @@ def query_node():
     finally:
         txn.discard()
         client_stub.close()
+
+def _build_cors_preflight_response():
+    response = make_response()
+    response.headers.add("Access-Control-Allow-Origin", "http://localhost:5173")
+    response.headers.add('Access-Control-Allow-Headers', "Content-Type,Authorization")
+    response.headers.add('Access-Control-Allow-Methods', "GET,PUT,POST,DELETE,OPTIONS")
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
+
+def _corsify_actual_response(response):
+    response.headers.add("Access-Control-Allow-Origin", "http://localhost:5173")
+    response.headers.add('Access-Control-Allow-Headers', "Content-Type,Authorization")
+    response.headers.add('Access-Control-Allow-Methods', "GET,PUT,POST,DELETE,OPTIONS")
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
