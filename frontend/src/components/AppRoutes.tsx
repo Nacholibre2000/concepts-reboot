@@ -1,8 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Home from '../views/index';
-import AddNode from '../components/AddNode';
-import Layout from '../components/Layout';
+import Home from '../index';
+import AddNode from './AddNode';
+import Layout from './Layout';
 
 //
 

@@ -107,6 +107,6 @@
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
   },
-  "include": ["src/**/*", "views/index.tsx", "components/App.tsx"],
+  "include": ["src/**/*", "views/index.tsx", "src/components/App.tsx"],
   "exclude": ["node_modules", "dist"]
 }

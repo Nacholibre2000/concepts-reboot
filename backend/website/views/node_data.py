@@ -134,3 +134,55 @@ def add_node():
     finally:
         txn.discard()
         client_stub.close()
+
+@node_data.route('/node_data/query', methods=['GET'])
+def query_node():
+    node_value = request.args.get('node')
+    
+    if not node_value:
+        return jsonify({"message": "Missing query parameter: node"}), 400
+    
+    # Define the possible predicates to search for
+    predicates = ["concept", "person", "event", "place_name"]
+
+    # Construct the query with unique aliases
+    query_parts = []
+    for i, predicate in enumerate(predicates):
+        query_parts.append(f'query{i} as var(func: eq({predicate}, "{node_value}"))')
+
+    query = f"""
+    {{
+        { " ".join(query_parts) }
+        results(func: uid(query0, query1, query2, query3)) {{
+            uid
+            concept
+            person
+            event
+            place_name
+            explanation
+            place_geo
+            image_url
+            date
+            source
+            license
+            hashtags {{
+                uid
+                concept
+                person
+                event
+                place_name
+            }}
+        }}
+    }}
+    """
+
+    client, client_stub = create_dgraph_client()
+    txn = client.txn()
+    try:
+        response = txn.query(query)
+        response_json = json.loads(response.json)
+        print(response_json)  # Print the result to verify the data retrieval
+        return jsonify(response_json)
+    finally:
+        txn.discard()
+        client_stub.close()
