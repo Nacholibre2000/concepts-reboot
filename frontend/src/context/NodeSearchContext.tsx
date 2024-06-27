@@ -14,8 +14,13 @@ export const NodeSearchProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const [searchResults, setSearchResults] = useState<any>(null);
 
+  const handleSetSearchResults = (results: any) => {
+    console.log('Setting search results:', results);
+    setSearchResults(results);
+  };
+
   return (
-    <NodeSearchContext.Provider value={{ searchResults, setSearchResults }}>
+    <NodeSearchContext.Provider value={{ searchResults, setSearchResults: handleSetSearchResults }}>
       {children}
     </NodeSearchContext.Provider>
   );

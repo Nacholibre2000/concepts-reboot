@@ -14,7 +14,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <Navbar />
         <div className="flex flex-1">
           <Sidebar />
-          <main>{children}</main>
+          <main className="flex-1 overflow-auto">{children}</main>
         </div>
       </div>
     </NodeSearchProvider>

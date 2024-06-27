@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Home from '../index';
 import AddNode from './AddNode';
 import Layout from './Layout';
+import NodeSearchResults from './NodeSearchResults';
 
 //
 
@@ -16,6 +17,14 @@ const AppRoutes: React.FC = () => {
           element={
             <Layout>
               <AddNode />
+            </Layout>
+          }
+        />
+        <Route
+          path="/flashcards-results"
+          element={
+            <Layout>
+              <NodeSearchResults />
             </Layout>
           }
         />

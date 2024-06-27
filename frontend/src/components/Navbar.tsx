@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useNodeSearch } from '../context/NodeSearchContext';
 
 export default function Navbar() {
   const [searchTerm, setSearchTerm] = useState('');
   const { setSearchResults } = useNodeSearch();
+  const navigate = useNavigate();
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,7 +17,9 @@ export default function Navbar() {
           params: { node: searchTerm },
         },
       );
+      console.log('API response:', response.data.results);
       setSearchResults(response.data.results);
+      navigate('/flashcards-results'); // Navigate to the search results page
     } catch (err: any) {
       console.error(
         'Error searching:',
@@ -64,6 +67,12 @@ export default function Navbar() {
               </button>
             </label>
           </form>
+          <Link
+            to="/flashcards-results"
+            className="text-base font-bold text-gray-300 hover:text-gray-100"
+          >
+            Flashcards
+          </Link>
           <Link
             to="/add-node"
             className="text-base font-bold text-gray-300 hover:text-gray-100"
