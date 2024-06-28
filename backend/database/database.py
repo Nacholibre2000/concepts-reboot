@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import os
 import postgresql_data_import as postgresql_data_import
 import import_data_to_dgraph 
+import dgraph_drop_all_data
 
 load_dotenv()
 
@@ -17,6 +18,7 @@ load_dotenv()
 # import curriculum data from postgresql to dgraph
 #-----------------------------------------------#
 import_data_to_dgraph.import_data_to_dgraph()
+#dgraph_drop_all_data.drop_all_data()
 #-----------------------------------------------#
 
 
