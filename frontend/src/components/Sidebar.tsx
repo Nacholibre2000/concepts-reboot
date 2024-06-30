@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import FunnelIcon from './FunnelIcon';
+import { useExpandedItems } from '../context/ExpandedItemsContext';
 
 type Item = {
   id: number;
@@ -9,11 +10,9 @@ type Item = {
 
 export default function Sidebar() {
   const [data, setData] = useState<Item[]>([]);
-  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const { expandedItems, toggleExpand } = useExpandedItems(); // Use the context
   const [toggledItems, setToggledItems] = useState<Set<string>>(new Set());
-  const [expandedTextItems, setExpandedTextItems] = useState<Set<string>>(
-    new Set(),
-  );
+  const [expandedTextItems, setExpandedTextItems] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     // Fetch data from your API endpoint
@@ -44,7 +43,6 @@ export default function Sidebar() {
 
         const mappedData = mapDataRecursively(allData);
         setData(mappedData);
-        setExpandedItems(new Set()); // Reset the expanded items
       });
   }, []);
 
@@ -59,17 +57,6 @@ export default function Sidebar() {
     setToggledItems(newToggledItems);
   };
 
-  const toggleExpand = (id: number, table: string) => {
-    const compositeKey = `${id}-${table}`;
-    const newExpandedItems = new Set(expandedItems);
-    if (newExpandedItems.has(compositeKey)) {
-      newExpandedItems.delete(compositeKey);
-    } else {
-      newExpandedItems.add(compositeKey);
-    }
-    setExpandedItems(newExpandedItems);
-  };
-
   const toggleTextExpand = (id: number, table: string) => {
     const compositeKey = `${id}-${table}`;
     const newTextItems = new Set(expandedTextItems);
@@ -82,20 +69,16 @@ export default function Sidebar() {
   };
 
   const renderTree = (items: Item[], level: number = 0) => {
-    const indent = 10 * level; // 10 pixels of indentation per level
+    const indent = 10 * level;
 
     return (
       <ul style={{ marginLeft: `${indent}px` }}>
         {items.map((item) => (
           <li key={`${item.id}-${item.table}`} className="w-full">
-            {' '}
-            {/* Set width to 100% */}
-            <div
-              className={`flex w-full items-center justify-between rounded p-2 hover:bg-gray-700`}
-            >
+            <div className={`flex w-full items-center justify-between rounded p-2 hover:bg-gray-700`}>
               <button
                 className={`text-left text-base text-sm text-gray-400 ${toggledItems.has(`${item.id}-${item.table}`) ? 'font-bold' : 'font-normal'} mb-2 block w-full text-left hover:text-gray-100`}
-                onClick={() => toggleExpand(item.id, item.table)}
+                onClick={() => toggleExpand(`${item.id}-${item.table}`)} // Use the context's toggleExpand
               >
                 {expandedTextItems.has(`${item.id}-${item.table}`)
                   ? item.displayName
@@ -109,14 +92,10 @@ export default function Sidebar() {
                 </button>
               )}
               <button onClick={() => toggleBold(item.id, item.table, data)}>
-                <FunnelIcon
-                  toggled={toggledItems.has(`${item.id}-${item.table}`)}
-                />
+                <FunnelIcon toggled={toggledItems.has(`${item.id}-${item.table}`)} />
               </button>
             </div>
-            {expandedItems.has(`${item.id}-${item.table}`) &&
-              item.children &&
-              renderTree(item.children, level + 1)}
+            {expandedItems.has(`${item.id}-${item.table}`) && item.children && renderTree(item.children, level + 1)}
           </li>
         ))}
       </ul>

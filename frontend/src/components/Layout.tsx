@@ -1,7 +1,8 @@
 import React, { ReactNode } from 'react';
-import Navbar from './Navbar'; // Adjust the import to your folder structure
-import Sidebar from './Sidebar'; // Import the Sidebar component
-import { NodeSearchProvider } from '../context/NodeSearchContext'; // Import NodeSearchProvider
+import Navbar from './Navbar';
+import Sidebar from './Sidebar';
+import { NodeSearchProvider } from '../context/NodeSearchContext';
+import { ExpandedItemsProvider } from '../context/ExpandedItemsContext'; // Import ExpandedItemsProvider
 
 type LayoutProps = {
   children: ReactNode;
@@ -9,15 +10,17 @@ type LayoutProps = {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <NodeSearchProvider>
-      <div className="flex h-screen flex-col">
-        <Navbar />
-        <div className="flex flex-1">
-          <Sidebar />
-          <main className="flex-1 overflow-auto">{children}</main>
+    <ExpandedItemsProvider>
+      <NodeSearchProvider>
+        <div className="flex h-screen flex-col">
+          <Navbar />
+          <div className="flex flex-1">
+            <Sidebar />
+            <main className="flex-1 overflow-auto">{children}</main>
+          </div>
         </div>
-      </div>
-    </NodeSearchProvider>
+      </NodeSearchProvider>
+    </ExpandedItemsProvider>
   );
 };
 
