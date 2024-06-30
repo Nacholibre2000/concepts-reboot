@@ -20,10 +20,10 @@ load_dotenv()
 #-----------------------------------------------#
 # dgraph operations
 #-----------------------------------------------#
-#import_data_to_dgraph.import_data_to_dgraph()
+import_data_to_dgraph.import_data_to_dgraph()
 #dgraph_drop_all_data.drop_all_data()
 #dgraph_export_script.export_schema()
-dgraph_import_schema.import_schema()
+#dgraph_import_schema.import_schema()
 #-----------------------------------------------#
 
 
