@@ -2,13 +2,8 @@ import os
 import json
 import psycopg2
 import pydgraph
-import logging
 from urllib.parse import urlparse
 from dotenv import load_dotenv
-
-# Configure logging
-logging.basicConfig(level=logging.DEBUG, filename='import_log.log', filemode='w')
-logger = logging.getLogger(__name__)
 
 # Load environment variables from .env file
 load_dotenv()
@@ -58,15 +53,15 @@ def import_data_to_dgraph():
         for row in rows:
             data.append({"id": str(row[0]), "table": table})  # Convert id to string
 
-    logger.debug(f"Fetched {len(data)} items from PostgreSQL:")
+    print(f"Fetched {len(data)} items from PostgreSQL:")
     for item in data:
-        logger.debug(item)
+        print(item)
 
     client, client_stub = create_dgraph_client()
 
     try:
         for item in data:
-            logger.debug(item)
+            print(item)
             curriculum_composite_key = f"{item['table']}_{item['id']}"
             query = f"""
             {{
@@ -74,26 +69,26 @@ def import_data_to_dgraph():
                     uid
                     id
                     curriculum_table
-                    composite_key
+                    curriculum_composite_key
                     hashtags
                 }}
             }}
             """
-            logger.debug(f"Query to check existing node: {query}")
+            print(f"Query to check existing node: {query}")
             
             # Use a new transaction for each query
             txn = client.txn()
             try:
                 response = txn.query(query)
                 response_json = response.json.decode('utf-8')
-                logger.debug(f"Response JSON: {response_json}")
+                print(f"Response JSON: {response_json}")
                 existing_nodes = json.loads(response_json).get('existing_node', [])
             finally:
                 txn.discard()
 
             if existing_nodes:
                 uid = existing_nodes[0]['uid']
-                logger.debug(f"Updating existing node with uid: {uid}")
+                print(f"Updating existing node with uid: {uid}")
                 # Ensure hashtags is added to existing nodes
                 node = {
                     "uid": uid,
@@ -101,7 +96,7 @@ def import_data_to_dgraph():
                 }
             else:
                 uid = "_:newNode"
-                logger.debug("No nodes found. Creating new node.")
+                print("No nodes found. Creating new node.")
 
             node = {
                 "uid": uid,
@@ -110,7 +105,7 @@ def import_data_to_dgraph():
                 "curriculum_composite_key": curriculum_composite_key,
                 "hashtags": []
             }
-            logger.debug(f"set_json: {node}")
+            print(f"set_json: {node}")
             
             # Immediately upsert this node
             mutation = pydgraph.Mutation(set_json=json.dumps(node).encode('utf-8'))
@@ -118,16 +113,16 @@ def import_data_to_dgraph():
             try:
                 response = txn.mutate(mutation)
                 txn.commit()
-                logger.debug(f"Upserted node: {response.uids}")
+                print(f"Upserted node: {response.uids}")
             except Exception as e:
-                logger.error(f"Error upserting node: {e}")
+                print(f"Error upserting node: {e}")
             finally:
                 txn.discard()
 
-        logger.info("Data successfully imported into Dgraph.")
+        print("Data successfully imported into Dgraph.")
 
     except Exception as e:
-        logger.error(f"An error occurred: {e}")
+        print(f"An error occurred: {e}")
     finally:
         client_stub.close()
         conn.close()

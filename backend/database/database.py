@@ -3,8 +3,11 @@ from sqlalchemy import create_engine
 from dotenv import load_dotenv
 import os
 import postgresql_data_import as postgresql_data_import
-import import_data_to_dgraph 
-import dgraph_drop_all_data
+from dgraph_scripts import import_data_to_dgraph
+from dgraph_scripts import dgraph_drop_all_data
+from dgraph_scripts import dgraph_export_script
+from dgraph_scripts import dgraph_import_schema
+
 
 load_dotenv()
 
@@ -15,10 +18,12 @@ load_dotenv()
 #-----------------------------------------------#
 
 #-----------------------------------------------#
-# import curriculum data from postgresql to dgraph
+# dgraph operations
 #-----------------------------------------------#
-import_data_to_dgraph.import_data_to_dgraph()
+#import_data_to_dgraph.import_data_to_dgraph()
 #dgraph_drop_all_data.drop_all_data()
+#dgraph_export_script.export_schema()
+dgraph_import_schema.import_schema()
 #-----------------------------------------------#
 
 
