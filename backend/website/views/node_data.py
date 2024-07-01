@@ -98,6 +98,15 @@ def add_node():
                         }}
                     }}
                     """
+                elif tag['type'] == 'curriculum':
+                    query = f"""
+                    {{
+                        existingNode as var(func: eq(curriculum_composite_key, "{tag['name']}"))
+                        query(func: uid(existingNode)) {{
+                            uid
+                        }}
+                    }}
+                    """
 
                 print(f"Query for tag {tag['name']}: {query}")
 
@@ -109,12 +118,15 @@ def add_node():
                         # Use the existing node UID
                         hashtag_uids.append({'uid': result['query'][0]['uid']})
                     else:
-                        # Create a new node
-                        new_tag = {
-                            'uid': f'_:newTag{len(hashtag_uids)}',  # Create unique blank node identifier
-                            tag['type']: tag['name']
-                        }
-                        hashtag_uids.append(new_tag)
+                        # Create a new node only for non-curriculum types
+                        if tag['type'] != 'curriculum':
+                            new_tag = {
+                                'uid': f'_:newTag{len(hashtag_uids)}',  # Create unique blank node identifier
+                                tag['type']: tag['name']
+                            }
+                            hashtag_uids.append(new_tag)
+                        else:
+                            print(f"Warning: Curriculum node not found for {tag['name']}")
 
         # Link hashtags to the main node
         if hashtag_uids:

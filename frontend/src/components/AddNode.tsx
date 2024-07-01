@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useSelectedItems } from '../context/SelectedItemsContext'; // Import the hook
 
 const AddNode: React.FC = () => {
+  const { selectedContentAndRequirements } = useSelectedItems(); // Use the hook
   const [formData, setFormData] = useState({
     image_url: '',
     concept: '',
@@ -28,6 +30,8 @@ const AddNode: React.FC = () => {
     source: false,
     license: false,
   });
+
+  const [curriculumHashtagsAdded, setCurriculumHashtags] = useState(false);
 
   const [newHashtag, setNewHashtag] = useState({ name: '', type: 'concept' });
 
@@ -67,6 +71,10 @@ const AddNode: React.FC = () => {
     });
   };
 
+  const handleAddCurriculumHashtags = () => {
+    setCurriculumHashtags(true);
+  };
+
   const handleAddHashtag = () => {
     setFormData({
       ...formData,
@@ -88,20 +96,27 @@ const AddNode: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const allHashtags = [
+        ...formData.hashtags,
+        ...(curriculumHashtagsAdded ? selectedContentAndRequirements.map(tag => ({ name: tag, type: 'curriculum' })) : [])
+      ];
+      
       console.log('Form data being submitted:', {
         ...formData,
-        hashtags: formData.hashtags,
+        hashtags: allHashtags,
       });
+      
       const response = await axios.post(
         'http://localhost:5000/api/node_data/add_node',
         {
           ...formData,
-          date: formData.date ? new Date(formData.date).toISOString() : null, // Ensure date is in ISO format
+          hashtags: allHashtags,
+          date: formData.date ? new Date(formData.date).toISOString() : null,
         },
       );
       alert(`Node added successfully: ${response.data.uid}`);
     } catch (error) {
-      const err = error as any; // Type assertion here
+      const err = error as any;
       alert(
         `Failed to add node: ${err.response ? err.response.data.message : err.message}`,
       );
@@ -312,6 +327,13 @@ const AddNode: React.FC = () => {
                 Add Hashtag
               </button>
             </div>
+            <button 
+              type="button" 
+              onClick={handleAddCurriculumHashtags}
+              style={{ backgroundColor: curriculumHashtagsAdded ? 'green' : 'initial' }}
+            >
+              {curriculumHashtagsAdded ? 'Curriculum Items Added as Hashtags' : 'Add Curriculum Selection as Hashtags'}
+            </button>
           </div>
         </>
       )}
