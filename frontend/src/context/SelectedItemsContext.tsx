@@ -27,11 +27,16 @@ export const SelectedItemsProvider: React.FC<{ children: ReactNode }> = ({ child
   }, []);
 
   useEffect(() => {
-    const newSelectedContentAndRequirements = Array.from(selectedItems).filter(item => {
-      const [, table] = item.split('-');
-      return table === 'central_contents' || table === 'central_requirements';
-    });
-
+    const newSelectedContentAndRequirements = Array.from(selectedItems)
+      .filter(item => {
+        const [id, table] = item.split('-');
+        return table === 'central_contents' || table === 'central_requirements';
+      })
+      .map(item => {
+        const [id, table] = item.split('-');
+        return `${table}_${id}`;
+      });
+  
     setSelectedContentAndRequirements(newSelectedContentAndRequirements);
     console.log('Selected central_contents and central_requirements:', newSelectedContentAndRequirements);
   }, [selectedItems]);
